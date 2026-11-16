@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mise en situation des réseaux informels exclusifs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+/* Une diapositive 1600 x 900 mise à l'échelle de la fenêtre, pilotée au clavier. */
+/* Un seul thème clair, choisi pour la projection en classe. */
+:root {
+  color-scheme: light;
+  --paper: #F1F3F7;
+  --card: #FFFFFF;
+  --ink: #131A26;
+  --muted: #566074;
+  --line: #CCD3DF;
+  --neutral: #5B6577;
+  --trio: #2952CC;
+  --trio-soft: #DDE6FC;
+  --autres: #C4570A;
+  --autres-soft: #FBE5D3;
+  --idea: #F7C62F;
+  --display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { height: 100%; }
+body { background: var(--paper); color: var(--ink); font-family: var(--body); overflow: hidden; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+.slide { position: absolute; left: 0; top: 0; width: 1600px; height: 900px; transform-origin: 0 0; }
+
+/* Bandeau du haut */
+.top { position: absolute; left: 56px; right: 56px; top: 0; height: 70px; display: flex; align-items: center; gap: 32px; border-bottom: 2px solid var(--line); }
+.chap { font-family: var(--display); font-weight: 800; font-size: 26px; }
+.legend { margin-left: auto; display: flex; gap: 28px; font-size: 19px; color: var(--muted); transition: opacity .5s; }
+.legend.off { opacity: 0; }
+.legend span { display: flex; align-items: center; gap: 9px; }
+.dot { width: 16px; height: 16px; border-radius: 50%; display: inline-block; }
+.dot.t { background: var(--trio); }
+.dot.o { background: var(--autres); }
+.count { font-size: 19px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 70px; text-align: right; }
+
+/* Vues */
+.view { position: absolute; left: 0; right: 0; top: 70px; height: 770px; opacity: 0; visibility: hidden; transition: opacity .45s, visibility 0s .45s; }
+.view.on { opacity: 1; visibility: visible; transition: opacity .45s; }
+.stage { position: absolute; left: 0; top: 0; width: 1600px; height: 570px; }
+.caption { position: absolute; left: 140px; right: 140px; top: 582px; height: 180px; display: flex; align-items: center; font-size: 31px; line-height: 1.36; }
+.caption p { max-width: 1320px; }
+.caption.small { font-size: 22px; color: var(--muted); }
+
+/* Barre du bas */
+.bar { position: absolute; left: 56px; right: 56px; bottom: 0; height: 60px; display: flex; align-items: center; gap: 12px; border-top: 2px solid var(--line); }
+.hint { font-size: 17px; color: var(--muted); margin-right: auto; }
+.btn { border: 2px solid var(--ink); background: var(--card); border-radius: 8px; padding: 6px 16px; font-size: 17px; font-weight: 700; }
+.btn.main { background: var(--ink); color: #fff; }
+.btn.quiet { border-color: var(--line); font-weight: 400; }
+.btn:disabled { opacity: .35; cursor: default; }
+
+/* Titre */
+#v-title { padding: 110px 140px 0; }
+.eyebrow { font-size: 24px; color: var(--muted); letter-spacing: .04em; }
+#v-title h1 { font-family: var(--display); font-weight: 800; font-size: 124px; line-height: .98; margin-top: 22px; max-width: 1100px; text-wrap: balance; }
+.six { display: flex; gap: 18px; margin-top: 64px; }
+.six i { width: 64px; height: 64px; border-radius: 50%; background: var(--neutral); }
+.start { margin-top: 44px; font-size: 24px; color: var(--muted); }
+
+/* Personnages */
+.links { position: absolute; inset: 0; width: 1600px; height: 570px; }
+.link { stroke: var(--trio); stroke-width: 5; stroke-linecap: round; opacity: 0; transition: opacity .6s; }
+.s-links .link { opacity: .55; }
+.av { position: absolute; left: 0; top: 0; width: 88px; height: 88px; transition: opacity .7s; }
+.av .in { width: 88px; height: 88px; border-radius: 50%; background: var(--neutral); color: #fff; display: grid; place-items: center; font-family: var(--display); font-weight: 800; font-size: 38px; transition: background .7s; }
+.s-colors .av.t .in { background: var(--trio); }
+.s-colors .av.o .in { background: var(--autres); }
+.av .nm { position: absolute; top: 94px; left: 50%; transform: translateX(-50%); font-size: 21px; font-weight: 700; white-space: nowrap; background: var(--paper); padding: 0 7px; border-radius: 6px; }
+.av .bulb { position: absolute; right: -14px; top: -24px; width: 30px; height: 34px; opacity: 0; transform: scale(.4); transform-origin: 50% 100%; transition: opacity .6s, transform .6s; }
+.s-bulbs .av .bulb { opacity: 1; transform: none; }
+.s-low #av-maxime .bulb, .s-low #av-amelie .bulb { opacity: 0; transform: scale(.3); }
+.s-low #av-sofia .bulb { opacity: .5; transform: scale(.62); }
+.s-dim .av.o .bulb { opacity: 0; transform: scale(.3); }
+.s-dim .av.o { opacity: .5; }
+.av .scrib { position: absolute; left: -12px; top: -18px; width: 30px; height: 18px; opacity: 0; transition: opacity .6s; }
+.s-over .av.t .scrib { opacity: 1; }
+.s-over .av.t .in { animation: wobble .5s ease-in-out infinite; }
+@keyframes wobble { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+
+/* Carte du projet */
+.proj { position: absolute; left: 630px; top: 200px; width: 340px; height: 170px; background: var(--card); border: 2px solid var(--ink); border-radius: 14px; padding: 16px 22px; }
+.proj h3 { font-family: var(--display); font-weight: 800; font-size: 24px; }
+.row { margin-top: 12px; transition: opacity .6s; }
+.row small { display: block; font-size: 15px; color: var(--muted); margin-bottom: 5px; }
+.track { height: 16px; border-radius: 8px; background: #E6EAF1; overflow: hidden; display: flex; }
+.track i { display: block; height: 100%; transition: width 1s cubic-bezier(.4, 0, .2, 1); }
+#r-av { opacity: 0; }
+#r-av i { width: 0; background: var(--ink); }
+.s-progress #r-av { opacity: 1; }
+.s-progress #r-av i { width: 45%; }
+.s-split #r-av i { width: 55%; }
+.s-split2 #r-av i { width: 62%; }
+#r-sp { opacity: 0; }
+#r-sp i.t { width: 50%; background: var(--trio); }
+#r-sp i.o { flex: 1; background: var(--autres); }
+.s-split #r-sp { opacity: 1; }
+.s-split #r-sp i.t { width: 70%; }
+.s-split2 #r-sp i.t { width: 88%; }
+
+/* Étiquettes de la scène */
+.pill { position: absolute; transform: translateX(-50%); background: var(--trio-soft); border: 2px solid var(--trio); color: var(--ink); border-radius: 999px; padding: 5px 16px; font-size: 18px; font-weight: 700; white-space: nowrap; opacity: 0; transition: opacity .6s; }
+.s-chat .pill.chat { opacity: 1; }
+.s-ask .pill.think { opacity: 1; }
+.pill.think { background: var(--card); border-style: dashed; }
+.bub { position: absolute; width: 46px; height: 30px; margin: -15px 0 0 -23px; border-radius: 10px; background: var(--card); border: 2px solid var(--trio); display: flex; align-items: center; justify-content: center; gap: 4px; opacity: 0; }
+.bub b { width: 5px; height: 5px; border-radius: 50%; background: var(--trio); }
+.s-chat .bub { animation: pop 2.4s ease-in-out infinite; }
+.s-chat .bub:nth-of-type(2) { animation-delay: .8s; }
+.s-chat .bub:nth-of-type(3) { animation-delay: 1.6s; }
+@keyframes pop { 0%, 100% { opacity: 0; transform: scale(.6); } 20%, 60% { opacity: 1; transform: scale(1); } 80% { opacity: 0; transform: scale(.9); } }
+.chip { position: absolute; left: 480px; width: 128px; height: 40px; border-radius: 8px; background: var(--card); border: 2px solid var(--trio); display: flex; align-items: center; gap: 8px; padding: 0 10px; font-size: 17px; font-weight: 700; opacity: 0; transition: opacity .5s, left 1s cubic-bezier(.4, 0, .2, 1); }
+.chip svg { width: 16px; height: 16px; flex: none; }
+.s-chips .chip { opacity: 1; }
+.s-sent .chip { left: 1000px; }
+.chip:nth-of-type(2) { transition-delay: 0s, .12s; }
+.chip:nth-of-type(3) { transition-delay: 0s, .24s; }
+.loopg { position: absolute; left: 768px; top: 96px; width: 64px; height: 64px; opacity: 0; transition: opacity .6s; }
+.s-loop .loopg { opacity: 1; animation: spin 2.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.pile { position: absolute; left: 480px; top: 212px; width: 128px; height: 150px; display: flex; flex-direction: column-reverse; gap: 5px; }
+.pile b { height: 20px; border-radius: 5px; background: var(--trio-soft); border: 2px solid var(--trio); opacity: 0; transform: translateY(-24px); transition: opacity .4s, transform .4s; }
+.s-over .pile b { opacity: 1; transform: none; }
+.pile b:nth-child(2) { transition-delay: .15s; margin-left: 8px; }
+.pile b:nth-child(3) { transition-delay: .3s; margin-right: 10px; }
+.pile b:nth-child(4) { transition-delay: .45s; margin-left: 4px; }
+.pile b:nth-child(5) { transition-delay: .6s; margin-right: 6px; }
+.pile b:nth-child(6) { transition-delay: .75s; margin-left: 10px; }
+
+/* Vote */
+#v-vote, #v-end { padding: 44px 140px 0; }
+.view h2 { font-family: var(--display); font-weight: 800; font-size: 68px; line-height: 1.05; text-wrap: balance; }
+.opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 44px; }
+.opt { background: var(--card); border: 2px solid var(--ink); border-radius: 16px; padding: 26px 28px; display: flex; flex-direction: column; gap: 8px; }
+.minis { display: flex; gap: 6px; height: 40px; }
+.minis i { width: 40px; height: 40px; border-radius: 50%; }
+.minis i.t { background: var(--trio); }
+.minis i.o { background: var(--autres); }
+.opt h3 { font-family: var(--display); font-weight: 800; font-size: 36px; margin-top: 10px; }
+.opt p { font-size: 20px; color: var(--muted); }
+.tally { display: flex; align-items: center; gap: 18px; margin-top: 18px; }
+.tally output { font-family: var(--display); font-weight: 800; font-size: 104px; line-height: 1; font-variant-numeric: tabular-nums; min-width: 130px; }
+.tally button { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--ink); background: var(--card); font-size: 36px; font-weight: 700; line-height: 1; }
+.tally button.plus { background: var(--ink); color: #fff; }
+.keys { margin-top: 30px; font-size: 20px; color: var(--muted); }
+
+/* Boucle */
+.col { position: absolute; top: 40px; width: 220px; }
+.col.t { left: 50px; }
+.col.o { left: 1340px; }
+.col h3 { font-family: var(--display); font-weight: 800; font-size: 24px; margin-bottom: 14px; }
+.who { display: flex; align-items: center; gap: 12px; font-size: 21px; font-weight: 700; margin-bottom: 10px; }
+.who i { width: 44px; height: 44px; border-radius: 50%; }
+.col.t .who i { background: var(--trio); }
+.col.o .who i { background: var(--autres); }
+.gauge { margin-top: 26px; opacity: 0; transition: opacity .6s; }
+.l4 .gauge { opacity: 1; }
+.gauge small { display: block; font-size: 17px; color: var(--muted); margin-bottom: 7px; line-height: 1.25; }
+.gauge .track { height: 20px; border-radius: 10px; }
+.col.t .gauge i { background: var(--trio); width: 35%; }
+.col.o .gauge i { background: var(--autres); width: 70%; }
+.gauge em { display: block; font-style: normal; font-weight: 700; font-size: 20px; margin-top: 10px; opacity: 0; transition: opacity .6s; }
+.done .gauge em { opacity: 1; }
+.lcard { position: absolute; background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 18px 24px 22px; font-size: 23px; line-height: 1.38; opacity: 0; transform: translateY(14px); transition: opacity .6s, transform .6s, border-color .3s, box-shadow .3s; }
+.lcard .n { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--ink); color: #fff; font-family: var(--display); font-weight: 800; font-size: 19px; margin-bottom: 8px; }
+.lcard p { display: block; }
+#c1 { left: 830px; top: 12px; width: 460px; }
+#c2 { left: 830px; top: 372px; width: 460px; }
+#c3 { left: 290px; top: 150px; width: 440px; }
+.l1 #c1, .l2 #c1, .l3 #c1, .l4 #c1, .l2 #c2, .l3 #c2, .l4 #c2, .l3 #c3, .l4 #c3 { opacity: 1; transform: none; }
+.lcard.hot { border-color: var(--ink); box-shadow: 0 0 0 5px rgba(19, 26, 38, .14); }
+u { text-decoration-line: underline; text-decoration-thickness: 4px; text-underline-offset: 6px; text-decoration-skip-ink: none; }
+u.t { text-decoration-color: var(--trio); }
+u.o { text-decoration-color: var(--autres); }
+.arrows { position: absolute; inset: 0; width: 1600px; height: 570px; pointer-events: none; }
+.arrows path { fill: none; stroke: var(--ink); stroke-width: 4; stroke-linecap: round; opacity: 0; transition: opacity .6s; }
+.l2 #a12, .l3 #a12, .l4 #a12, .l3 #a23, .l4 #a23, .l3 #a31, .l4 #a31 { opacity: 1; }
+.l4 .arrows path { stroke-dasharray: 10 10; animation: flow .8s linear infinite; }
+.l4.done .arrows path { animation-duration: 2.4s; }
+@keyframes flow { to { stroke-dashoffset: -20; } }
+.tour { position: absolute; left: 760px; top: 236px; width: 270px; text-align: center; font-family: var(--display); font-weight: 800; font-size: 54px; opacity: 0; transition: opacity .5s; }
+.l4 .tour { opacity: 1; }
+
+/* Conclusion */
+.keyline { display: flex; gap: 28px; margin-top: 14px; font-size: 20px; color: var(--muted); }
+.keyline span { display: flex; align-items: center; gap: 9px; }
+.sw { width: 34px; height: 14px; border-radius: 4px; background: var(--ink); display: inline-block; }
+.sw.a { background: repeating-linear-gradient(135deg, var(--ink) 0 3px, transparent 3px 7px); border: 2px solid var(--ink); }
+.res { margin-top: 34px; display: grid; gap: 30px; }
+.res .r { display: grid; grid-template-columns: 300px 1fr; align-items: center; gap: 24px; }
+.res h3 { font-family: var(--display); font-weight: 800; font-size: 30px; }
+.res p { font-size: 18px; color: var(--muted); }
+.bars { display: grid; gap: 8px; }
+.b { display: flex; align-items: center; gap: 14px; height: 34px; }
+.b i { display: block; height: 100%; border-radius: 6px; min-width: 6px; background: var(--ink); transition: width .9s cubic-bezier(.4, 0, .2, 1); }
+.b.a i { background: repeating-linear-gradient(135deg, var(--ink) 0 3px, transparent 3px 7px); border: 2px solid var(--ink); }
+.b span { font-family: var(--display); font-weight: 800; font-size: 28px; font-variant-numeric: tabular-nums; }
+.none { margin-top: 24px; font-size: 20px; color: var(--muted); }
+#end1, #end2 { transition: opacity .5s; }
+.p2 #end1 { opacity: 0; position: absolute; visibility: hidden; }
+#end2 { opacity: 0; visibility: hidden; position: absolute; left: 140px; right: 140px; top: 70px; }
+.p2 #end2 { opacity: 1; visibility: visible; }
+#end2 blockquote { font-family: var(--display); font-weight: 800; font-size: 66px; line-height: 1.12; max-width: 1300px; text-wrap: balance; }
+#end2 mark { background: linear-gradient(90deg, var(--trio) 50%, var(--autres) 50%) 0 100% / 100% 10px no-repeat; color: inherit; padding-bottom: 6px; }
+.all { display: flex; gap: 22px; margin-top: 60px; }
+.all div { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; }
+.all i { width: 68px; height: 68px; border-radius: 50%; }
+.all i.t { background: var(--trio); }
+.all i.o { background: var(--autres); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition-duration: .01s !important; }
+  .s-chat .bub { opacity: 1; }
+}
+</style>
+</head>
+<body>
+<div class="slide" id="slide">
+
+  <div class="top">
+    <div class="chap" id="chap">Enjeu EDIA</div>
+    <div class="legend off" id="legend">
+      <span><i class="dot t"></i>Le trio : Léa, Thomas, Nabil</span>
+      <span><i class="dot o"></i>Les trois autres : Maxime, Sofia, Amélie</span>
+    </div>
+    <div class="count" id="count">1 / 17</div>
+  </div>
+
+  <section class="view on" id="v-title">
+    <p class="eyebrow">Enjeu EDIA · Mise en situation</p>
+    <h1>Réseaux informels exclusifs</h1>
+    <div class="six"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <p class="start">Appuyez sur la flèche de droite pour commencer.</p>
+  </section>
+
+  <section class="view" id="v-story">
+    <div class="stage" id="stage">
+      <svg class="links" viewBox="0 0 1600 570" aria-hidden="true">
+        <line class="link" id="k0"/><line class="link" id="k1"/><line class="link" id="k2"/>
+      </svg>
+
+      <div class="proj">
+        <h3>Projet intégrateur</h3>
+        <div class="row" id="r-av"><small>Avancement</small><div class="track"><i></i></div></div>
+        <div class="row" id="r-sp"><small>Répartition du travail</small><div class="track"><i class="t"></i><i class="o"></i></div></div>
+      </div>
+
+      <div class="pill chat" style="left:325px;top:60px">Groupe chat du trio</div>
+      <div class="pill chat" style="left:325px;top:468px">Soirées ensemble</div>
+      <div class="pill think" style="left:590px;top:90px">Manque d'implication?</div>
+      <div class="bub" style="left:325px;top:180px"><b></b><b></b><b></b></div>
+      <div class="bub" style="left:282px;top:272px"><b></b><b></b><b></b></div>
+      <div class="bub" style="left:368px;top:272px"><b></b><b></b><b></b></div>
+
+      <div class="chip" style="top:215px"><svg viewBox="0 0 16 16"><path d="M2.5 8.5 6.5 12 13.5 4" fill="none" stroke="#2952CC" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Décision</div>
+      <div class="chip" style="top:268px"><svg viewBox="0 0 16 16"><path d="M2.5 8.5 6.5 12 13.5 4" fill="none" stroke="#2952CC" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Décision</div>
+      <div class="chip" style="top:321px"><svg viewBox="0 0 16 16"><path d="M2.5 8.5 6.5 12 13.5 4" fill="none" stroke="#2952CC" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Décision</div>
+
+      <div class="pile"><b></b><b></b><b></b><b></b><b></b><b></b></div>
+
+      <svg class="loopg" viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M32 8a24 24 0 1 1-20.8 12" fill="none" stroke="#131A26" stroke-width="5" stroke-linecap="round"/>
+        <path d="M5 24 21 23 12 9z" fill="#131A26"/>
+      </svg>
+
+      <div id="avs"></div>
+    </div>
+    <div class="caption"><p id="cap"></p></div>
+  </section>
+
+  <section class="view" id="v-vote">
+    <h2 id="vq">Intuitivement, c'est la faute de qui?</h2>
+    <div class="opts">
+      <div class="opt">
+        <div class="minis"><i class="t"></i><i class="t"></i><i class="t"></i></div>
+        <h3>Le trio</h3><p>Léa, Thomas, Nabil</p>
+        <div class="tally"><button type="button" data-o="0" data-d="-1" aria-label="Retirer une voix pour le trio">−</button><output id="o0">0</output><button type="button" class="plus" data-o="0" data-d="1" aria-label="Ajouter une voix pour le trio">+</button></div>
+      </div>
+      <div class="opt">
+        <div class="minis"><i class="o"></i><i class="o"></i><i class="o"></i></div>
+        <h3>Les trois autres</h3><p>Maxime, Sofia, Amélie</p>
+        <div class="tally"><button type="button" data-o="1" data-d="-1" aria-label="Retirer une voix pour les trois autres">−</button><output id="o1">0</output><button type="button" class="plus" data-o="1" data-d="1" aria-label="Ajouter une voix pour les trois autres">+</button></div>
+      </div>
+      <div class="opt">
+        <div class="minis"><i class="t"></i><i class="t"></i><i class="t"></i><i class="o"></i><i class="o"></i><i class="o"></i></div>
+        <h3>Les deux côtés</h3><p>Tout le monde</p>
+        <div class="tally"><button type="button" data-o="2" data-d="-1" aria-label="Retirer une voix pour les deux côtés">−</button><output id="o2">0</output><button type="button" class="plus" data-o="2" data-d="1" aria-label="Ajouter une voix pour les deux côtés">+</button></div>
+      </div>
+    </div>
+    <p class="keys">Comptez les mains levées avec les boutons, ou avec les touches 1, 2 et 3.</p>
+  </section>
+
+  <section class="view" id="v-loop">
+    <div class="stage" id="lstage">
+      <div class="col t">
+        <h3>Le trio</h3>
+        <div class="who"><i></i>Léa</div><div class="who"><i></i>Thomas</div><div class="who"><i></i>Nabil</div>
+        <div class="gauge"><small>Charge de travail du trio</small><div class="track"><i id="g-t"></i></div><em>Surchargé, frustration</em></div>
+      </div>
+      <div class="col o">
+        <h3>Les trois autres</h3>
+        <div class="who"><i></i>Maxime</div><div class="who"><i></i>Sofia</div><div class="who"><i></i>Amélie</div>
+        <div class="gauge"><small>Idées proposées par les trois autres</small><div class="track"><i id="g-o"></i></div><em>Strict minimum</em></div>
+      </div>
+
+      <svg class="arrows" viewBox="0 0 1600 570" aria-hidden="true">
+        <defs><marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#131A26" stroke="none"/></marker></defs>
+        <path id="a12" d="M1060 214 L1060 356" marker-end="url(#ah)"/>
+        <path id="a23" d="M822 462 C 778 462, 760 432, 744 398" marker-end="url(#ah)"/>
+        <path id="a31" d="M738 196 C 764 152, 786 118, 818 104" marker-end="url(#ah)"/>
+      </svg>
+
+      <div class="lcard" id="c1"><span class="n">1</span><p>De l'autre côté, <u class="o">les autres membres commencent à se sentir exclus</u> lorsque <u class="t">le trio arrive avec des règles déjà faites</u>.</p></div>
+      <div class="lcard" id="c2"><span class="n">2</span><p><u class="o">Ne voulant pas déranger le groupe déjà soudé, ils proposent de moins en moins d'idées.</u></p></div>
+      <div class="lcard" id="c3"><span class="n">3</span><p><u class="t">Le trio interprète ce silence comme un manque d'implication et fait une plus grande partie du projet</u>, ce qui laisse <u class="o">encore moins de place pour les coéquipiers exclus</u>.</p></div>
+      <div class="tour" id="tour">Tour 1</div>
+    </div>
+    <div class="caption" id="lcapbox"><p id="lcap"></p></div>
+  </section>
+
+  <section class="view" id="v-end">
+    <div id="end1">
+      <h2>Le vote, au début et à la fin</h2>
+      <div class="keyline"><span><i class="sw a"></i>Au début</span><span><i class="sw"></i>À la fin</span></div>
+      <div class="res" id="res"></div>
+      <p class="none" id="none" hidden>Aucune voix n'a été comptée pendant les votes.</p>
+    </div>
+    <div id="end2">
+      <blockquote>La responsabilité est <mark>partagée</mark> parce qu'aucun des deux groupes ne s'engage à mentionner le manque d'engagement d'équipe.</blockquote>
+      <div class="all">
+        <div><i class="t"></i>Léa</div><div><i class="o"></i>Maxime</div><div><i class="t"></i>Thomas</div><div><i class="o"></i>Sofia</div><div><i class="t"></i>Nabil</div><div><i class="o"></i>Amélie</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="bar">
+    <span class="hint">Flèches gauche et droite du clavier pour naviguer</span>
+    <button type="button" class="btn quiet" id="b-restart">Recommencer</button>
+    <button type="button" class="btn quiet" id="b-full">Plein écran</button>
+    <button type="button" class="btn" id="b-prev">Précédent</button>
+    <button type="button" class="btn main" id="b-next">Suivant</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Phrases du document, orthographe corrigée seulement.
+  var S = [
+    "Une équipe de six étudiants travaille ensemble sur un projet intégrateur.",
+    "Léa, Thomas et Nabil sont déjà des amis, tandis que Maxime, Sofia et Amélie ne connaissent personne.",
+    "Puisque le trio se connait bien, ils se parlent naturellement entre eux et font des soirées ensemble où ils finissent par avancer le projet, ils ont un groupe chat sans les autres membres de l'équipe et font des décisions vite fait.",
+    "Ils trouvent qu'ils sont productifs et que le travail avance bien, ils se sentent efficaces.",
+    "De l'autre côté, les autres membres commencent à se sentir exclus lorsque le trio arrive avec des règles déjà faites.",
+    "Ne voulant pas déranger le groupe déjà soudé, ils proposent de moins en moins d'idées.",
+    "Le trio interprète ce silence comme un manque d'implication et fait une plus grande partie du projet, ce qui laisse encore moins de place pour les coéquipiers exclus.",
+    "Cette boucle se répète jusqu'à ce que le trio soit surchargé et commence à accumuler de la frustration et les autres membres de l'équipe font le strict minimum."
+  ];
+
+  var PEOPLE = [
+    { id: 'lea', name: 'Léa', g: 't' }, { id: 'thomas', name: 'Thomas', g: 't' }, { id: 'nabil', name: 'Nabil', g: 't' },
+    { id: 'maxime', name: 'Maxime', g: 'o' }, { id: 'sofia', name: 'Sofia', g: 'o' }, { id: 'amelie', name: 'Amélie', g: 'o' }
+  ];
+  var TRIO = { lea: [240, 180], thomas: [410, 180], nabil: [325, 365] };
+  var LAY = {
+    mixed: { lea: [560, 95], maxime: [800, 95], thomas: [1040, 95], sofia: [560, 455], nabil: [800, 455], amelie: [1040, 455] },
+    grouped: { lea: [290, 170], thomas: [460, 170], nabil: [375, 330], maxime: [1130, 120], sofia: [1340, 285], amelie: [1130, 450] },
+    tight: Object.assign({ maxime: [1130, 120], sofia: [1340, 285], amelie: [1130, 450] }, TRIO),
+    away: Object.assign({ maxime: [1190, 110], sofia: [1410, 285], amelie: [1190, 460] }, TRIO),
+    far: Object.assign({ maxime: [1250, 100], sofia: [1470, 285], amelie: [1250, 470] }, TRIO)
+  };
+  var BASE = 'colors links bulbs';
+  var STEPS = [
+    { view: 'title', chap: 'Enjeu EDIA' },
+    { view: 'story', chap: 'La mise en situation', s: 0, lay: 'mixed', f: '' },
+    { view: 'story', chap: 'La mise en situation', s: 1, lay: 'grouped', f: BASE },
+    { view: 'story', chap: 'La mise en situation', s: 2, lay: 'tight', f: BASE + ' chat chips' },
+    { view: 'story', chap: 'La mise en situation', s: 3, lay: 'tight', f: BASE + ' chat chips progress' },
+    { view: 'story', chap: 'La mise en situation', s: 4, lay: 'away', f: BASE + ' chat chips progress sent' },
+    { view: 'story', chap: 'La mise en situation', s: 5, lay: 'away', f: BASE + ' chat chips progress sent low' },
+    { view: 'story', chap: 'La mise en situation', s: 6, lay: 'away', f: BASE + ' chat chips progress sent low ask split' },
+    { view: 'story', chap: 'La mise en situation', s: 7, lay: 'far', f: BASE + ' chat chips progress sent low ask split split2 loop over dim' },
+    { view: 'vote', chap: 'Premier vote', v: 0 },
+    { view: 'loop', chap: "L'évolution, étape par étape", n: 1 },
+    { view: 'loop', chap: "L'évolution, étape par étape", n: 2 },
+    { view: 'loop', chap: "L'évolution, étape par étape", n: 3 },
+    { view: 'loop', chap: "L'évolution, étape par étape", n: 4 },
+    { view: 'vote', chap: 'Deuxième vote', v: 1 },
+    { view: 'end', chap: 'Conclusion', p: 1 },
+    { view: 'end', chap: 'Conclusion', p: 2 }
+  ];
+
+  // Mise à l'échelle de la diapositive.
+  var slide = $('slide');
+  function fit() {
+    var k = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
+    slide.style.transform = 'translate(' + (window.innerWidth - 1600 * k) / 2 + 'px,' + (window.innerHeight - 900 * k) / 2 + 'px) scale(' + k + ')';
+  }
+  window.addEventListener('resize', fit);
+  fit();
+
+  // Personnages et liens du trio.
+  var avs = $('avs'), el = {}, pos = {};
+  var BULB = '<svg class="bulb" viewBox="0 0 30 34" aria-hidden="true"><path d="M15 3a9 9 0 0 0-5.5 16.1c.9.8 1.5 1.7 1.5 2.9h8c0-1.2.6-2.1 1.5-2.9A9 9 0 0 0 15 3z" fill="#F7C62F" stroke="#131A26" stroke-width="2"/><path d="M11.5 26h7M12.5 30h5" stroke="#131A26" stroke-width="2" stroke-linecap="round"/></svg>';
+  var SCRIB = '<svg class="scrib" viewBox="0 0 30 18" aria-hidden="true"><path d="M2 14 7 4l5 10 5-10 5 10 5-10" fill="none" stroke="#131A26" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  PEOPLE.forEach(function (p) {
+    var d = document.createElement('div');
+    d.className = 'av ' + p.g;
+    d.id = 'av-' + p.id;
+    d.innerHTML = '<div class="in">' + p.name.charAt(0) + '</div><span class="nm">' + p.name + '</span>' + BULB + SCRIB;
+    avs.appendChild(d);
+    el[p.id] = d;
+    pos[p.id] = LAY.mixed[p.id].slice();
+  });
+  var PAIRS = [['lea', 'thomas'], ['thomas', 'nabil'], ['nabil', 'lea']];
+  function place() {
+    PEOPLE.forEach(function (p) {
+      el[p.id].style.transform = 'translate(' + (pos[p.id][0] - 44) + 'px,' + (pos[p.id][1] - 44) + 'px)';
+    });
+    PAIRS.forEach(function (pr, i) {
+      var l = $('k' + i);
+      l.setAttribute('x1', pos[pr[0]][0]); l.setAttribute('y1', pos[pr[0]][1]);
+      l.setAttribute('x2', pos[pr[1]][0]); l.setAttribute('y2', pos[pr[1]][1]);
+    });
+  }
+  var raf = 0;
+  function moveTo(name, instant) {
+    cancelAnimationFrame(raf);
+    var to = LAY[name], from = {}, t0 = performance.now(), dur = 900;
+    PEOPLE.forEach(function (p) { from[p.id] = pos[p.id].slice(); });
+    function frame(now) {
+      var t = (instant || reduce) ? 1 : Math.min(1, (now - t0) / dur);
+      var e = t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      PEOPLE.forEach(function (p) {
+        pos[p.id][0] = from[p.id][0] + (to[p.id][0] - from[p.id][0]) * e;
+        pos[p.id][1] = from[p.id][1] + (to[p.id][1] - from[p.id][1]) * e;
+      });
+      place();
+      if (t < 1) raf = requestAnimationFrame(frame);
+    }
+    frame(t0);
+  }
+  place();
+
+  // Votes à main levée, gardés en mémoire pendant la présentation.
+  var votes = [[0, 0, 0], [0, 0, 0]], curVote = 0;
+  function showVotes() { for (var i = 0; i < 3; i++) $('o' + i).textContent = votes[curVote][i]; }
+  function addVote(o, d) { votes[curVote][o] = Math.max(0, votes[curVote][o] + d); showVotes(); }
+  document.querySelectorAll('.tally button').forEach(function (b) {
+    b.addEventListener('click', function () { addVote(+b.dataset.o, +b.dataset.d); });
+  });
+
+  // La boucle qui se répète.
+  var lstage = $('lstage'), timers = [];
+  var LOAD = [35, 52, 68, 84, 96], IDEAS = [70, 52, 34, 18, 8];
+  function clearLoop() {
+    timers.forEach(clearTimeout); timers = [];
+    ['c1', 'c2', 'c3'].forEach(function (c) { $(c).classList.remove('hot'); });
+    lstage.classList.remove('done');
+  }
+  function setLap(k) {
+    $('g-t').style.width = LOAD[k] + '%';
+    $('g-o').style.width = IDEAS[k] + '%';
+    $('tour').textContent = 'Tour ' + Math.min(4, k + 1);
+  }
+  function runLoop() {
+    clearLoop();
+    if (reduce) { setLap(4); lstage.classList.add('done'); return; }
+    setLap(0);
+    var beat = 750, order = ['c1', 'c2', 'c3'];
+    for (var lap = 0; lap < 4; lap++) {
+      order.forEach(function (c, j) {
+        timers.push(setTimeout(function () {
+          order.forEach(function (x) { $(x).classList.toggle('hot', x === c); });
+        }, 500 + (lap * 3 + j) * beat));
+      });
+      (function (k) {
+        timers.push(setTimeout(function () {
+          if (k < 4) setLap(k); else $('g-t').style.width = LOAD[4] + '%', $('g-o').style.width = IDEAS[4] + '%';
+        }, 500 + k * 3 * beat));
+      })(lap + 1);
+    }
+    timers.push(setTimeout(function () {
+      order.forEach(function (x) { $(x).classList.remove('hot'); });
+      lstage.classList.add('done');
+    }, 500 + 12 * beat + 300));
+  }
+
+  // Comparaison des deux votes.
+  var LABELS = [['Le trio', 'Léa, Thomas, Nabil'], ['Les trois autres', 'Maxime, Sofia, Amélie'], ['Les deux côtés', 'Tout le monde']];
+  function showResults() {
+    var max = Math.max.apply(null, votes[0].concat(votes[1]));
+    $('none').hidden = max > 0;
+    $('res').innerHTML = LABELS.map(function (l, i) {
+      function w(v) { return max ? Math.round(v / max * 780) : 0; }
+      return '<div class="r"><div><h3>' + l[0] + '</h3><p>' + l[1] + '</p></div><div class="bars">' +
+        '<div class="b a"><i style="width:' + w(votes[0][i]) + 'px"></i><span>' + votes[0][i] + '</span></div>' +
+        '<div class="b"><i style="width:' + w(votes[1][i]) + 'px"></i><span>' + votes[1][i] + '</span></div></div></div>';
+    }).join('');
+  }
+
+  // Navigation entre les étapes.
+  var cur = 0, stage = $('stage');
+  function show(i, instant) {
+    cur = Math.max(0, Math.min(STEPS.length - 1, i));
+    var st = STEPS[cur];
+    ['title', 'story', 'vote', 'loop', 'end'].forEach(function (v) { $('v-' + v).classList.toggle('on', v === st.view); });
+    $('chap').textContent = st.chap;
+    $('count').textContent = (cur + 1) + ' / ' + STEPS.length;
+    $('legend').classList.toggle('off', cur < 2);
+    $('b-prev').disabled = cur === 0;
+    $('b-next').disabled = cur === STEPS.length - 1;
+    clearLoop();
+    if (st.view === 'story') {
+      stage.className = 'stage ' + st.f.split(' ').filter(Boolean).map(function (f) { return 's-' + f; }).join(' ');
+      $('cap').textContent = S[st.s];
+      moveTo(st.lay, instant);
+    }
+    if (st.view === 'vote') {
+      curVote = st.v;
+      $('vq').textContent = st.v === 0 ? "Intuitivement, c'est la faute de qui?" : "Et maintenant, c'est la faute de qui?";
+      showVotes();
+    }
+    if (st.view === 'loop') {
+      lstage.className = 'stage l' + st.n;
+      var four = st.n === 4;
+      $('lcapbox').classList.toggle('small', !four);
+      $('lcap').textContent = four ? S[7] : 'Souligné en bleu : ce qui concerne le trio. Souligné en orange : ce qui concerne les trois autres.';
+      if (four) runLoop(); else setLap(0);
+    }
+    if (st.view === 'end') {
+      $('v-end').classList.toggle('p2', st.p === 2);
+      if (st.p === 1) showResults();
+    }
+  }
+  $('b-next').addEventListener('click', function () { show(cur + 1); });
+  $('b-prev').addEventListener('click', function () { show(cur - 1); });
+  $('b-restart').addEventListener('click', function () { votes = [[0, 0, 0], [0, 0, 0]]; show(0, true); });
+  $('b-full').addEventListener('click', function () {
+    try {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen().catch(function () {});
+    } catch (e) { /* plein écran refusé par le navigateur */ }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'PageDown' || (k === ' ' && e.target.tagName !== 'BUTTON')) { e.preventDefault(); show(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); show(cur - 1); }
+    else if (k === 'Home') { show(0, true); }
+    else if (STEPS[cur].view === 'vote' && (k === '1' || k === '2' || k === '3')) { addVote(+k - 1, 1); }
+  });
+  window.__go = show;
+  show(0, true);
+})();
+</script>
+</body>
+</html>
